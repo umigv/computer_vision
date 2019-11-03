@@ -11,29 +11,25 @@ from moviepy.editor import VideoFileClip
 
 # Lane Driving Pipeline
 # Distortion Corrected Image
-if not "MTX" in globals():
-    raise ValueError("Please run Main section above to generate required camera calibration coefficients.")
 
 TEST_IMG = ".\\test_images\\straight_lines1.jpg"
 lane_test_img = cv2.imread(TEST_IMG)
 lane_test_img_rgb = cv2.cvtColor(lane_test_img, cv2.COLOR_BGR2RGB)
-lane_test_undist = cv2.undistort(lane_test_img_rgb, MTX, DIST, None, MTX)
 
 TEST_IMG2 = ".\\test_images\\test1.jpg"
 lane_test_img2 = cv2.imread(TEST_IMG2)
 lane_test_img2_rgb = cv2.cvtColor(lane_test_img2, cv2.COLOR_BGR2RGB)
-lane_test_undist2 = cv2.undistort(lane_test_img2_rgb, MTX, DIST, None, MTX)
 
 f, axarr = plt.subplots(2,2)
 f.set_size_inches(17, 10)
 axarr[0, 0].imshow(lane_test_img_rgb)
-axarr[0, 1].imshow(lane_test_undist)
+axarr[0, 1].imshow(lane_test_img_rgb)
 axarr[0, 0].set_title("Original Image")
 axarr[0, 1].set_title("Undistorted Image")
 axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
 axarr[1, 0].imshow(lane_test_img2_rgb)
-axarr[1, 1].imshow(lane_test_undist2)
+axarr[1, 1].imshow(lane_test_img_rgb2)
 axarr[1, 0].axis('off')
 axarr[1, 1].axis('off');
 
@@ -95,14 +91,14 @@ def gradient_threshold(channel, thresh):
     return sxbinary
 
 # LAB and LUV channel threshold
-s_binary = binary_threshold_lab_luv(lane_test_undist, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
-s_binary2 = binary_threshold_lab_luv(lane_test_undist2, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
+s_binary = binary_threshold_lab_luv(lane_test_img_rgb, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
+s_binary2 = binary_threshold_lab_luv(lane_test_img_rgb2, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
 
 # Gradient threshold on S channel
-h, l, s = seperate_hls(lane_test_undist)
+h, l, s = seperate_hls(lane_test_img_rgb)
 sxbinary = gradient_threshold(s, GRADIENT_THRESH)
 
-h2, l2, s2 = seperate_hls(lane_test_undist2)
+h2, l2, s2 = seperate_hls(lane_test_img_rgb2)
 sxbinary2 = gradient_threshold(s2, GRADIENT_THRESH)
 
 # Combine two binary images to view their contribution in green and red
@@ -112,7 +108,7 @@ color_binary2 = np.dstack((sxbinary2, s_binary2, np.zeros_like(sxbinary2))) * 25
 # Draw figure for binary images
 f, axarr = plt.subplots(2,4)
 f.set_size_inches(25, 8)
-axarr[0, 0].imshow(lane_test_undist)
+axarr[0, 0].imshow(lane_test_img_rgb)
 axarr[0, 1].imshow(s_binary, cmap='gray')
 axarr[0, 2].imshow(sxbinary, cmap='gray')
 axarr[0, 3].imshow(color_binary)
@@ -124,7 +120,7 @@ axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
 axarr[0, 2].axis('off')
 axarr[0, 3].axis('off')
-axarr[1, 0].imshow(lane_test_undist2)
+axarr[1, 0].imshow(lane_test_img_rgb2)
 axarr[1, 1].imshow(s_binary2, cmap='gray')
 axarr[1, 2].imshow(sxbinary2, cmap='gray')
 axarr[1, 3].imshow(color_binary2)
@@ -134,7 +130,7 @@ axarr[1, 2].axis('off')
 axarr[1, 3].axis('off');
 
 # Perspective transform
-IMG_SIZE = lane_test_undist.shape[::-1][1:]
+IMG_SIZE = lane_test_img_rgb.shape[::-1][1:]
 OFFSET = 300
 
 PRES_SRC_PNTS = np.float32([
@@ -151,14 +147,14 @@ PRES_DST_PNTS = np.float32([
     [IMG_SIZE[0]-OFFSET, 0]
 ])
 
-lane_test_undist_cp = lane_test_undist.copy()
+lane_test_img_rgb_cp = lane_test_img_rgb.copy()
 plt.figure(figsize = (15, 15))
-plt.imshow(cv2.polylines(lane_test_undist_cp, np.int32([PRES_SRC_PNTS]), True, (255,0,0), 3));
+plt.imshow(cv2.polylines(lane_test_img_rgb_cp, np.int32([PRES_SRC_PNTS]), True, (255,0,0), 3));
 
 M = cv2.getPerspectiveTransform(PRES_SRC_PNTS, PRES_DST_PNTS)
 M_INV = cv2.getPerspectiveTransform(PRES_DST_PNTS, PRES_SRC_PNTS)
-warped = cv2.warpPerspective(lane_test_undist, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
-warped2 = cv2.warpPerspective(lane_test_undist2, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
+warped = cv2.warpPerspective(lane_test_img_rgb, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
+warped2 = cv2.warpPerspective(lane_test_img_rgb2, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
 
 warped_cp = warped.copy()
 warped2_cp = warped2.copy()
