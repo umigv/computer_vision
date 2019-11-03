@@ -7,16 +7,14 @@ import matplotlib.pyplot as plt
 
 from moviepy.editor import VideoFileClip
 
-%matplotlib inline
-
 # Lane Driving Pipeline
 # Distortion Corrected Image
 
-TEST_IMG = ".\\test_images\\straight_lines1.jpg"
+TEST_IMG = "assets/Im1.png"
 lane_test_img = cv2.imread(TEST_IMG)
 lane_test_img_rgb = cv2.cvtColor(lane_test_img, cv2.COLOR_BGR2RGB)
 
-TEST_IMG2 = ".\\test_images\\test1.jpg"
+TEST_IMG2 = "assets/Im2.png"
 lane_test_img2 = cv2.imread(TEST_IMG2)
 lane_test_img2_rgb = cv2.cvtColor(lane_test_img2, cv2.COLOR_BGR2RGB)
 
@@ -29,7 +27,7 @@ axarr[0, 1].set_title("Undistorted Image")
 axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
 axarr[1, 0].imshow(lane_test_img2_rgb)
-axarr[1, 1].imshow(lane_test_img_rgb2)
+axarr[1, 1].imshow(lane_test_img2_rgb)
 axarr[1, 0].axis('off')
 axarr[1, 1].axis('off');
 
@@ -92,13 +90,13 @@ def gradient_threshold(channel, thresh):
 
 # LAB and LUV channel threshold
 s_binary = binary_threshold_lab_luv(lane_test_img_rgb, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
-s_binary2 = binary_threshold_lab_luv(lane_test_img_rgb2, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
+s_binary2 = binary_threshold_lab_luv(lane_test_img2_rgb, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
 
 # Gradient threshold on S channel
 h, l, s = seperate_hls(lane_test_img_rgb)
 sxbinary = gradient_threshold(s, GRADIENT_THRESH)
 
-h2, l2, s2 = seperate_hls(lane_test_img_rgb2)
+h2, l2, s2 = seperate_hls(lane_test_img2_rgb)
 sxbinary2 = gradient_threshold(s2, GRADIENT_THRESH)
 
 # Combine two binary images to view their contribution in green and red
@@ -120,7 +118,7 @@ axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
 axarr[0, 2].axis('off')
 axarr[0, 3].axis('off')
-axarr[1, 0].imshow(lane_test_img_rgb2)
+axarr[1, 0].imshow(lane_test_img2_rgb)
 axarr[1, 1].imshow(s_binary2, cmap='gray')
 axarr[1, 2].imshow(sxbinary2, cmap='gray')
 axarr[1, 3].imshow(color_binary2)
@@ -154,7 +152,7 @@ plt.imshow(cv2.polylines(lane_test_img_rgb_cp, np.int32([PRES_SRC_PNTS]), True, 
 M = cv2.getPerspectiveTransform(PRES_SRC_PNTS, PRES_DST_PNTS)
 M_INV = cv2.getPerspectiveTransform(PRES_DST_PNTS, PRES_SRC_PNTS)
 warped = cv2.warpPerspective(lane_test_img_rgb, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
-warped2 = cv2.warpPerspective(lane_test_img_rgb2, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
+warped2 = cv2.warpPerspective(lane_test_img2_rgb, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
 
 warped_cp = warped.copy()
 warped2_cp = warped2.copy()
