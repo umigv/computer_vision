@@ -10,13 +10,10 @@ from moviepy.editor import VideoFileClip
 # Lane Driving Pipeline
 # Distortion Corrected Image
 
-TEST_IMG = "assets/Im1.png"
-lane_test_img = cv2.imread(TEST_IMG)
+TEST_IMG = "/Users/mattsaraceno/Desktop/computer_vision/polynomial_fit_testing/assets/Im1.png"
+lane_test_img = cv2.imread(TEST_IMG,cv2.IMREAD_COLOR)
 lane_test_img_rgb = cv2.cvtColor(lane_test_img, cv2.COLOR_BGR2RGB)
 
-TEST_IMG2 = "assets/Im2.png"
-lane_test_img2 = cv2.imread(TEST_IMG2)
-lane_test_img2_rgb = cv2.cvtColor(lane_test_img2, cv2.COLOR_BGR2RGB)
 
 f, axarr = plt.subplots(2,2)
 f.set_size_inches(17, 10)
@@ -26,10 +23,7 @@ axarr[0, 0].set_title("Original Image")
 axarr[0, 1].set_title("Undistorted Image")
 axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
-axarr[1, 0].imshow(lane_test_img2_rgb)
-axarr[1, 1].imshow(lane_test_img2_rgb)
-axarr[1, 0].axis('off')
-axarr[1, 1].axis('off');
+
 
 # Threshold Binary Image
 GRADIENT_THRESH = (20, 100)
@@ -90,18 +84,14 @@ def gradient_threshold(channel, thresh):
 
 # LAB and LUV channel threshold
 s_binary = binary_threshold_lab_luv(lane_test_img_rgb, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
-s_binary2 = binary_threshold_lab_luv(lane_test_img2_rgb, B_CHANNEL_THRESH, L2_CHANNEL_THRESH)
 
 # Gradient threshold on S channel
 h, l, s = seperate_hls(lane_test_img_rgb)
 sxbinary = gradient_threshold(s, GRADIENT_THRESH)
 
-h2, l2, s2 = seperate_hls(lane_test_img2_rgb)
-sxbinary2 = gradient_threshold(s2, GRADIENT_THRESH)
 
 # Combine two binary images to view their contribution in green and red
 color_binary = np.dstack((sxbinary, s_binary, np.zeros_like(sxbinary))) * 255
-color_binary2 = np.dstack((sxbinary2, s_binary2, np.zeros_like(sxbinary2))) * 255
 
 # Draw figure for binary images
 f, axarr = plt.subplots(2,4)
@@ -118,14 +108,6 @@ axarr[0, 0].axis('off')
 axarr[0, 1].axis('off')
 axarr[0, 2].axis('off')
 axarr[0, 3].axis('off')
-axarr[1, 0].imshow(lane_test_img2_rgb)
-axarr[1, 1].imshow(s_binary2, cmap='gray')
-axarr[1, 2].imshow(sxbinary2, cmap='gray')
-axarr[1, 3].imshow(color_binary2)
-axarr[1, 0].axis('off')
-axarr[1, 1].axis('off')
-axarr[1, 2].axis('off')
-axarr[1, 3].axis('off');
 
 # Perspective transform
 IMG_SIZE = lane_test_img_rgb.shape[::-1][1:]
@@ -152,18 +134,14 @@ plt.imshow(cv2.polylines(lane_test_img_rgb_cp, np.int32([PRES_SRC_PNTS]), True, 
 M = cv2.getPerspectiveTransform(PRES_SRC_PNTS, PRES_DST_PNTS)
 M_INV = cv2.getPerspectiveTransform(PRES_DST_PNTS, PRES_SRC_PNTS)
 warped = cv2.warpPerspective(lane_test_img_rgb, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
-warped2 = cv2.warpPerspective(lane_test_img2_rgb, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
 
 warped_cp = warped.copy()
-warped2_cp = warped2.copy()
 warped_poly = cv2.polylines(warped_cp, np.int32([PRES_DST_PNTS]), True, (255,0,0), 3)
-warped2_poly = cv2.polylines(warped2_cp, np.int32([PRES_DST_PNTS]), True, (255,0,0), 3)
 
 # Draw figure for the two warped lane lines
 f, axarr = plt.subplots(1,2)
 f.set_size_inches(18, 5)
 axarr[0].imshow(warped_poly)
-axarr[1].imshow(warped2_poly)
 axarr[0].set_title("Warped result with destination points Drawn")
 axarr[1].set_title("Warped result with destination points Drawn 2");
 
@@ -195,6 +173,8 @@ def get_lane_indices_sliding_windows(binary_warped, leftx_base, rightx_base, n_w
     nonzero = binary_warped.nonzero()
     nonzeroy = np.array(nonzero[0])
     nonzerox = np.array(nonzero[1])
+
+
     
     # Create empty lists to receive left and right lane pixel indices
     left_lane_inds = []
@@ -263,11 +243,9 @@ def get_lane_indices_from_prev_window(binary_warped_img, left_fit, right_fit, ma
 
 # Warp binary image of lane line
 binary_warped = cv2.warpPerspective(s_binary, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
-binary_warped2 = cv2.warpPerspective(s_binary2, M, IMG_SIZE, flags=cv2.INTER_LINEAR)
 
 # Calculate histogram of lane line pixels
 histogram = np.sum(binary_warped[int(binary_warped.shape[0]/2):,:], axis=0)
-histogram2 = np.sum(binary_warped2[int(binary_warped2.shape[0]/2):,:], axis=0)
 
 # Draw figure for warped binary and histogram
 f, axarr = plt.subplots(2,2)
@@ -276,18 +254,11 @@ axarr[0, 0].imshow(binary_warped, cmap='gray')
 axarr[0, 1].plot(histogram)
 axarr[0, 0].set_title("Warped Binary Lane Line")
 axarr[0, 1].set_title("Histogram of Lane line Pixels")
-axarr[1, 0].imshow(binary_warped2, cmap='gray')
-axarr[1, 1].plot(histogram2)
-axarr[1, 0].set_title("Warped Binary Lane Line 2")
-axarr[1, 1].set_title("Histogram of Lane line Pixels 2");
 
 leftx_base, rightx_base = histo_peak(histogram)
 left_lane_inds, right_lane_inds, nonzerox, nonzeroy, out_img = get_lane_indices_sliding_windows(
     binary_warped, leftx_base, rightx_base, N_WINDOWS, MARGIN, RECENTER_MINPIX)
 
-leftx_base2, rightx_base2 = histo_peak(histogram2)
-left_lane_inds2, right_lane_inds2, nonzerox2, nonzeroy2, out_img2 = get_lane_indices_sliding_windows(
-    binary_warped2, leftx_base2, rightx_base2, N_WINDOWS, MARGIN, RECENTER_MINPIX)
 
 # Extract left and right line pixel positions
 leftx = nonzerox[left_lane_inds]
@@ -295,30 +266,22 @@ lefty = nonzeroy[left_lane_inds]
 rightx = nonzerox[right_lane_inds]
 righty = nonzeroy[right_lane_inds]
 
-leftx2 = nonzerox2[left_lane_inds2]
-lefty2 = nonzeroy2[left_lane_inds2] 
-rightx2 = nonzerox2[right_lane_inds2]
-righty2 = nonzeroy2[right_lane_inds2]
+
 
 # Fit a second order polynomial to each
 left_fit = np.polyfit(lefty, leftx, 2)
 right_fit = np.polyfit(righty, rightx, 2)
-left_fit2 = np.polyfit(lefty2, leftx2, 2)
-right_fit2 = np.polyfit(righty2, rightx2, 2)
+
 
 # Generate x and y values for plotting
 ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0])
 left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
 right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 
-ploty2 = np.linspace(0, binary_warped2.shape[0]-1, binary_warped2.shape[0] )
-left_fitx2 = left_fit2[0]*ploty2**2 + left_fit2[1]*ploty2 + left_fit2[2]
-right_fitx2 = right_fit2[0]*ploty2**2 + right_fit2[1]*ploty2 + right_fit2[2]
 
 out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
 out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
-out_img2[nonzeroy2[left_lane_inds2], nonzerox2[left_lane_inds2]] = [255, 0, 0]
-out_img2[nonzeroy2[right_lane_inds2], nonzerox2[right_lane_inds2]] = [0, 0, 255]
+
 
 # Draw figures of line lanes detected
 f, axarr = plt.subplots(2,2)
@@ -329,10 +292,7 @@ axarr[0, 1].plot(left_fitx, ploty, color='yellow')
 axarr[0, 1].plot(right_fitx, ploty, color='yellow')
 axarr[0, 0].set_title("Original Warped Lane Line Image")
 axarr[0, 1].set_title("Lane Lines Detected");
-axarr[1, 0].imshow(warped2_cp)
-axarr[1, 1].plot(left_fitx2, ploty2, color='yellow')
-axarr[1, 1].plot(right_fitx2, ploty2, color='yellow')
-axarr[1, 1].imshow(out_img2)
+
 plt.xlim(0, 1280)
 plt.ylim(720, 0);
 
@@ -351,12 +311,10 @@ out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
 # Generate a polygon to illustrate the search window area
 # And recast the x and y points into usable format for cv2.fillPoly()
 left_line_window1 = np.array([np.transpose(np.vstack([left_fitx-MARGIN, ploty]))])
-left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx+MARGIN, 
-                              ploty])))])
+
 left_line_pts = np.hstack((left_line_window1, left_line_window2))
 right_line_window1 = np.array([np.transpose(np.vstack([right_fitx-MARGIN, ploty]))])
-right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx+MARGIN, 
-                              ploty])))])
+
 right_line_pts = np.hstack((right_line_window1, right_line_window2))
 
 # Draw the lane onto the warped blank image
