@@ -27,6 +27,15 @@ def blue_slider(intensity):
     modified_image[:,:,0] = image[:,:,0] * (intensity/255.0)
     cv.imshow("Test image", modified_image)
 
+def sat_func(intensity):
+    pass
+
+def blue_yellow_func(intensity):
+    pass
+
+def l_func(intensity):
+    pass
+
 cv.namedWindow("Test image")
 cv.createTrackbar("Red", "Test image", 255, 255, red_slider)
 cv.createTrackbar("Green", "Test image", 255, 255, green_slider)
