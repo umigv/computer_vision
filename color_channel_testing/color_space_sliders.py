@@ -87,11 +87,11 @@ def gradient_threshold(channel, thresh):
     return sxbinary
 
 
-gradient_thresh = (0, 255)
-s_channel_thresh = (0, 255)
-l_channel_thresh = (0, 255)
-b_channel_thresh = (0, 255)
-l2_channel_thresh = (0, 255)
+gradient_thresh = (20, 100)
+s_channel_thresh = (80, 255)
+l_channel_thresh = (80, 255)
+b_channel_thresh = (150, 200)
+l2_channel_thresh = (225, 255)
 window_name = "Test image"
 
 
@@ -192,16 +192,16 @@ def l2_max_func(intensity):
 
 
 cv.namedWindow(window_name)
-cv.createTrackbar("Minimum Gradient", window_name, 255, 255, gradient_min_func)
-cv.createTrackbar("Maximum Gradient", window_name, 255, 255, gradient_max_func)
-cv.createTrackbar("Minimum S Channel", window_name, 255, 255, s_min_func)
-cv.createTrackbar("Maximum S Channel", window_name, 255, 255, s_max_func)
-cv.createTrackbar("Minimum L Channel", window_name, 255, 255, l_min_func)
-cv.createTrackbar("Maximum L Channel", window_name, 255, 255, l_max_func)
-cv.createTrackbar("Minimum B Channel", window_name, 255, 255, b_min_func)
-cv.createTrackbar("Maximum B Channel", window_name, 255, 255, b_max_func)
-cv.createTrackbar("Minimum L2 Channel", window_name, 255, 255, l2_min_func)
-cv.createTrackbar("Maximum L2 Channel", window_name, 255, 255, l2_max_func)
+cv.createTrackbar("Minimum Gradient", window_name, gradient_thresh[0], 255, gradient_min_func)
+cv.createTrackbar("Maximum Gradient", window_name, gradient_thresh[1], 255, gradient_max_func)
+cv.createTrackbar("Minimum S Channel", window_name, s_channel_thresh[0], 255, s_min_func)
+cv.createTrackbar("Maximum S Channel", window_name, s_channel_thresh[1], 255, s_max_func)
+cv.createTrackbar("Minimum L Channel", window_name, l_channel_thresh[0], 255, l_min_func)
+cv.createTrackbar("Maximum L Channel", window_name, l_channel_thresh[1], 255, l_max_func)
+cv.createTrackbar("Minimum B Channel", window_name, b_channel_thresh[0], 255, b_min_func)
+cv.createTrackbar("Maximum B Channel", window_name, b_channel_thresh[1], 255, b_max_func)
+cv.createTrackbar("Minimum L2 Channel", window_name, l2_channel_thresh[0], 255, l2_min_func)
+cv.createTrackbar("Maximum L2 Channel", window_name, l2_channel_thresh[1], 255, l2_max_func)
 
 update_image()
 cv.waitKey(0)
