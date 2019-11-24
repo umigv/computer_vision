@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import copy
+import json
 import sys
 import time
 
@@ -86,12 +87,21 @@ def gradient_threshold(channel, thresh):
     sxbinary[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])] = 1
     return sxbinary
 
+try:
+    with open('thresh.json') as f:
+        thresh_dict = json.loads(f.read())
+        gradient_thresh = (thresh_dict['gradient_min'], thresh_dict['gradient_max'])
+        s_channel_thresh = (thresh_dict['s_channel_min'], thresh_dict['s_channel_max'])
+        l_channel_thresh = (thresh_dict['l_channel_min'], thresh_dict['l_channel_max'])
+        b_channel_thresh = (thresh_dict['b_channel_min'], thresh_dict['b_channel_max'])
+        l2_channel_thresh = (thresh_dict['l2_channel_max'], thresh_dict['l2_channel_min'])
+except:
+    gradient_thresh = (20, 100)
+    s_channel_thresh = (80, 255)
+    l_channel_thresh = (80, 255)
+    b_channel_thresh = (150, 200)
+    l2_channel_thresh = (225, 255)
 
-gradient_thresh = (20, 100)
-s_channel_thresh = (80, 255)
-l_channel_thresh = (80, 255)
-b_channel_thresh = (150, 200)
-l2_channel_thresh = (225, 255)
 window_name = "Test image"
 
 
@@ -205,3 +215,11 @@ cv.createTrackbar("Maximum L2 Channel", window_name, l2_channel_thresh[1], 255, 
 
 update_image()
 cv.waitKey(0)
+
+with open("thresh.json", 'w') as f:
+    thresh_dict = {"gradient_min": gradient_thresh[0], "gradient_max": gradient_thresh[1],
+        "s_channel_min": s_channel_thresh[0], "s_channel_max": s_channel_thresh[1],
+        "l_channel_min": l_channel_thresh[0], "l_channel_max": l_channel_thresh[1],
+        "b_channel_min": b_channel_thresh[0], "b_channel_max": b_channel_thresh[1],
+        "l2_channel_min": l2_channel_thresh[0], "l2_channel_max": l2_channel_thresh[1]}
+    f.write(json.dumps(thresh_dict, indent=4, separators=(',', ': '), sort_keys=True))
