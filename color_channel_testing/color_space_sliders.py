@@ -191,7 +191,7 @@ def l2_max_func(intensity):
     update_image()
 
 
-cv.namedWindow(window_name)
+cv.namedWindow(window_name, cv.WINDOW_NORMAL)
 cv.createTrackbar("Minimum Gradient", window_name, gradient_thresh[0], 255, gradient_min_func)
 cv.createTrackbar("Maximum Gradient", window_name, gradient_thresh[1], 255, gradient_max_func)
 cv.createTrackbar("Minimum S Channel", window_name, s_channel_thresh[0], 255, s_min_func)
