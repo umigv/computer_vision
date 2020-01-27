@@ -1,30 +1,37 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/core.hpp"
+#include <opencv2/core/utility.hpp>
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/cudaimgproc.hpp"
 #include <iostream>
+#include <vector>
 
 using namespace cv;
+using namespace cv::cuda;
 using namespace std;
+
+const string TEST_IMAGE = "../assets/Im3.png";
+const int GRADIENT_THRESH[2] = {20,100};
+const int L_CHANNEL_THRESH[2] = {130,255};
+const int B_CHANNEL_THRESH[2] = {170,1210};
+
 
 int main( int argc, char** argv )
 {
-    if( argc != 2)
-    {
-     cout <<" Usage: display_image ImageToLoadAndDisplay" << endl;
-     return -1;
-    }
-
-    Mat image;
-    image = imread(argv[1], CV_LOAD_IMAGE_COLOR);   // Read the file
-
-    if(! image.data )                              // Check for invalid input
-    {
-        cout <<  "Could not open or find the image" << std::endl ;
-        return -1;
-    }
-
-    namedWindow( "Display window", WINDOW_AUTOSIZE );// Create a window for display.
-    imshow( "Display window", image );                   // Show our image inside it.
-
-    waitKey(0);                                          // Wait for a keystroke in the window
+	Mat src = imread("TEST_IMAGE",IMREAD_COLOR);
+	
+	GpuMat gpu;
+	gpu.upload(src);
+	
+	if (gpu.type==CV_8UC1) 
+		cout << gpu.type << endl;
+	else
+		cv::cuda::cvtColor(gpu,gpu,COLOR_BGR2RGB);
+	
+	
+	
+	imshow("test", gpu);
+	waitKey(0);
+	
     return 0;
 }
