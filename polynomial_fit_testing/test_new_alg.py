@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 import time
 
+import pyzed.sl as sl
+
 def seperate_hls(rgb_img):
     hls = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2HLS)
     h = hls[:,:,0]
@@ -53,12 +55,35 @@ def gradient_threshold(channel, thresh):
     return sxbinary
     
 def main():
-	TEST_IMAGE = "assets/Im3.png"
-	lane_test_image_cpu = cv2.imread(TEST_IMAGE)
+	#GET IMAGE FROM ZED
+	zed = sl.Camera()
+	init_params = sl.InitParameters()
+	init_params.camera_resolution = sl.RESOLUTION.RESOLUTION_HD720
+	init_params.depth_mode = sl.DEPTH_MODE.DEPTH_MODE_PERFORMANCE
+	init_params.coordinate_system = sl.COORDINATE_SYSTEM.COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP_X_FWD
+	init_params.coordinate_units = sl.UNIT.UNIT_METER
+
+	err = zed.open(init_params)
+	if (err != sl.ERROR_CODE.SUCCESS):
+            print("HAHA FUCK YOU GUYS!!!\n\tSincerely, the ZED team.")
+            exit(-1)
+
+
+	image = sl.Mat()
+	
+	if (zed.grab(sl.RuntimeParameters()) == sl.ERROR_CODE.SUCCESS):
+            # A new image is available if grab() returns SUCCESS
+            zed.retrieve_image(image, sl.VIEW.VIEW_LEFT)
+
+
+	#TEST_IMAGE = "assets/Im3.png"
+	lane_test_image_cpu = image.get_data()
 	lane_test_image = cv2.UMat(lane_test_image_cpu)
 	lane_test_image = cv2.cvtColor(lane_test_image,cv2.COLOR_BGR2RGB)
 	#plt.imshow(lane_test_image_cpu)
 
+	cv2.imshow("yo",lane_test_image_cpu)
+	cv2.waitKey(1000)
 	first = time.time()
 
 
@@ -110,9 +135,9 @@ def main():
 
 	histogram = np.sum(binary_warped[int(binary_warped.shape[0]/2):,:],axis=0)
 
-	#plt.plot(histogram)
+	plt.plot(histogram)
 
-	#plt.imshow(binary_warped)
+	plt.imshow(binary_warped)
 
 	leftx_base, rightx_base = histo_peak(histogram)
 	left_lane_inds,right_lane_inds,nonzerox,nonzeroy, out_img = get_lane_indices_sliding_windows( binary_warped,leftx_base,rightx_base,N_WINDOWS,MARGIN,RECENTER_MINPIX)
@@ -132,9 +157,9 @@ def main():
 	out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
 	out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
 
-	#plt.imshow(warped_cp)
+	plt.imshow(warped_cp)
 
-	#plt.imshow(out_img)
+	plt.imshow(out_img)
 
 	left_lane_inds,right_lane_inds, ploty, left_fitx,right_fitx = get_lane_indices_from_prev_window( binary_warped,left_fit,right_fit,MARGIN)
 
@@ -162,8 +187,8 @@ def main():
 	axarr[0].imshow(binary_warped,cmap='gray')
 	axarr[0].plot(left_fitx,ploty,color='red')
 	axarr[0].plot(right_fitx,ploty,color='red')
-	
-	#plt.show()
+	zed.close()
+	plt.show()
 
 	
 
@@ -254,5 +279,5 @@ def get_lane_indices_from_prev_window(binary_warped, left_fit, right_fit, margin
 
 	
 if __name__ == "__main__":
-	for i in range(10):
-		main()
+	#for i in range(10):
+	main()
